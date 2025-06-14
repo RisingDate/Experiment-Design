@@ -1,5 +1,7 @@
 import os
 import re
+import httpx
+from openai import OpenAI
 
 from langchain_community.chat_message_histories import SQLChatMessageHistory
 from langchain_community.llms import SparkLLM
@@ -8,18 +10,19 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, Prom
 from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_ollama.llms import OllamaLLM
 from langchain_openai import ChatOpenAI
-from openai import OpenAI
 
 os.environ["IFLYTEK_SPARK_APP_ID"] = "55713da8"
 os.environ["IFLYTEK_SPARK_API_SECRET"] = "NzI1OThjNDI0ODM5M2NiODBhY2NlYjFj"
 os.environ["IFLYTEK_SPARK_API_KEY"] = "966252a76081be0e92e8fb0d00e7c858"
 os.environ["OPENAI_API_KEY"] = "sk-IMblefS5KQ5ET8izUvenvX71tOXiIZDp3ICQ33mFcUtKV8lq"
+os.environ["OPENAI_BASE_URL"] = "https://uc.chatgptten.com/v1"
 
 # ollama模型白名单
 OLLAMA_MODEL_LIST = {
     'think': ['deepseek-r1:32b'],
     'nothink': []
 }
+
 
 # client_openAI = OpenAI(
 #     base_url="https://uc.chatgptten.com/v1",
@@ -108,8 +111,9 @@ class LLMAgent:
         elif self.llm_model == 'GPT-4o':
             print('Your Model is Gpt4o')
             model = ChatOpenAI(
-                temperature=0.7,
-                model_name='gpt-4o'
+                model="gpt-4o",
+                api_key=os.environ["OPENAI_API_KEY"],
+                base_url=os.environ.get("OPENAI_BASE_URL"),
             )
         elif self.llm_model in OLLAMA_MODEL_LIST['think'] + OLLAMA_MODEL_LIST['nothink']:
             print('Your Model is Ollama')
