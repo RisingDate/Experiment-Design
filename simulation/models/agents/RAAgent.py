@@ -7,10 +7,51 @@ class RequirementAnalysisAgent(LLMAgent):
                          system_prompt='',
                          llm_model='deepseek-r1:32b')
         self.system_prompt = '''
-        你正在对复杂社会模型系统推演中需求进行分析。你需要扮演一个资深的需求处理工程师的角色，你可以参考自身的经验，但请务必以模拟过程中的内容为主。
+            你正在对复杂社会模型系统推演中的需求进行分析。你需要扮演一个资深的需求处理工程师的角色，你可以参考自身的经验，但请务必以模拟过程中的内容为主。
+            在处理过程中你可能会遇到与实验方法有关的一些内容，这些实验方法指的都是计算实验方法，下面是对计算实验方法的一些粗略的介绍和举例，
+            请你在选择实验方法时尽可能的参考下面的内容：
+                计算实验方法可以分为确定性实验设计和非确定性实验设计，
+                确定性实验设计包括：'一次一因子设计'，'NK因子设计'，'网格设计'，'超饱和设计'，'均匀设计'，'正交设计'，'拉丁方设计'，
+                '分布因子设计'，'顺序分支设计'，'迭代分布析因设计'，'多步组筛选设计' 和 '托辛筛选设计'；
+                非确定性实验设计包括：'Monte Carlo'，'Markov-Chain Monte Carlo' 和 '重采样'三类方法
         '''
         self.is_first = True
 
+    # 需求分析
+    def requirement_analysis(self, req):
+        info_prompt = '''
+            你需要根据当前提出的实验需求和对需求的目的、影响需求的因素，需求的响应变量和实验分析的方法进行筛选和判断。
+            用户提出的需求为：
+                {req}
+            - 当你回复时，你必须采取下面的json格式,使用中文回复
+                   "goal": 你对当前世界局势紧张程度的判断，仅给出一个1-100之间的数字，数字越大说明世界局势越紧张。
+                   "influence_factor": 影响因素，即实验的自变量，能够尽可能全面的反应，'influence_factor'应该为一个list。
+                   "response_var": 响应变量，即实验的因变量，能够客观的反映实验的结果，'response_var'应该为一个list。
+                   "formula": 影响因素和响应变量之间的对应公式，每个响应变量都有一个确定的对应公式，公式以latex的形式给出，'formula'的格式为{'响应变量1': 公式1, '响应变量2': 公式2}
+                   "exp_method": 实验方法，具体参考上面提到的实验设计方法，你需要同时给出实验的组数和每组实验影响因素的取值水平，'exp_method'的格式为{'实验1': {'影响因素1': value1, '影响因素2': value2}...}。
+        '''
+        param_dict = {
+            'info': req,
+        }
+        llm_response, think = self.get_response(info_prompt, input_param_dict=param_dict,
+                                                is_first_call=self.is_first)
+        self.is_first = False
+        res = {
+            "goal": "",
+            "influence_factor": [],
+            "response_var": [],
+            "formula": {},
+            "exp_method": {},
+        }
+        try:
+            res = {
+                "goal": llm_response['goal'],
+                "influence_factor": llm_response['influence_factor'],
+                "response_var": llm_response['response_var'],
+                "formula": llm_response['formula'],
+                "exp_method": llm_response['exp_method']
+            }
+        except Exception as e:
+            print(e)
 
-    def requirement_analysis(self, info):
-        return
+        return res
