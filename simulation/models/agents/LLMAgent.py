@@ -7,10 +7,13 @@ from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_ollama.llms import OllamaLLM
+from langchain_openai import ChatOpenAI
+from openai import OpenAI
 
 os.environ["IFLYTEK_SPARK_APP_ID"] = "55713da8"
 os.environ["IFLYTEK_SPARK_API_SECRET"] = "NzI1OThjNDI0ODM5M2NiODBhY2NlYjFj"
 os.environ["IFLYTEK_SPARK_API_KEY"] = "966252a76081be0e92e8fb0d00e7c858"
+os.environ["OPENAI_API_KEY"] = "sk-IMblefS5KQ5ET8izUvenvX71tOXiIZDp3ICQ33mFcUtKV8lq"
 
 # ollama模型白名单
 OLLAMA_MODEL_LIST = {
@@ -18,6 +21,10 @@ OLLAMA_MODEL_LIST = {
     'nothink': []
 }
 
+# client_openAI = OpenAI(
+#     base_url="https://uc.chatgptten.com/v1",
+#     api_key="sk-IMblefS5KQ5ET8izUvenvX71tOXiIZDp3ICQ33mFcUtKV8lq"
+# )
 
 # os.environ["QIANFAN_AK"] = "H3cep7ar3Php6fNcNonpAubc"
 # os.environ["QIANFAN_SK"] = "k5CCykaXcU80DfSdFf1iE3jAPm3iIWTY"
@@ -98,7 +105,14 @@ class LLMAgent:
                 api_url='ws://spark-api.xf-yun.com/v1.1/chat',
                 model='lite'
             )
+        elif self.llm_model == 'GPT-4o':
+            print('Your Model is Gpt4o')
+            model = ChatOpenAI(
+                temperature=0.7,
+                model_name='gpt-4o'
+            )
         elif self.llm_model in OLLAMA_MODEL_LIST['think'] + OLLAMA_MODEL_LIST['nothink']:
+            print('Your Model is Ollama')
             # 初始化模型接口
             model = OllamaLLM(model=self.llm_model)
         elif self.llm_model == 'deepseek-70B':  # 本地vllm部署模型，目前不可用
@@ -154,7 +168,6 @@ class LLMAgent:
                     print(e)
                     return 'llm报错', 'llm报错'
             else:
-
                 chain = (prompt_template |
                          model |
                          parser)

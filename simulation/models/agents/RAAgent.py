@@ -23,27 +23,29 @@ class RequirementAnalysisAgent(LLMAgent):
             你需要根据当前提出的实验需求和对需求的目的、影响需求的因素，需求的响应变量和实验分析的方法进行筛选和判断。
             用户提出的需求为：
                 {req}
-            - 当你回复时，你必须采取下面的json格式,使用中文回复
-                   "goal": 你对当前世界局势紧张程度的判断，仅给出一个1-100之间的数字，数字越大说明世界局势越紧张。
+            - 当你回复时，你必须采取下面的json格式，请全部使用英文回答
+                   "goal": 用户此次实验或假设的目的，goal的类型请尽量从'现象解释'，'趋势预测'，'策略优化'中进行选择，并对其进行简单的解释\
+                   'goal'是一个json，包含category和explain。
                    "influence_factor": 影响因素，即实验的自变量，能够尽可能全面的反应，'influence_factor'应该为一个list。
                    "response_var": 响应变量，即实验的因变量，能够客观的反映实验的结果，'response_var'应该为一个list。
-                   "formula": 影响因素和响应变量之间的对应公式，每个响应变量都有一个确定的对应公式，公式以latex的形式给出，\
+                   "formula": 影响因素和响应变量之间的对应公式，每个响应变量都有一个确定的对应公式，公式以数学公式的形式给出，\
                    'formula'是一个数组，数组中每个元素都是一个字典，字典的key为响应变量的名称，value为影响因素组成的一个公式，key和value都需要以英文的形式给出
-                   "exp_method": 实验方法，具体参考上面提到的实验设计方法，你需要同时给出实验的组数和每组实验影响因素的取值水平组合，\
-                   'exp_method'是一个二维数组，二维数组的行数表示的是实验的组数，数组中的每个元素都是一个字典，字典的key为影响因素的名称，value为影响因素的取值。
+                   "exp_params": 实验参数的格式为json，包含'exp_method'和'params'，'exp_method'是实验方法，具体参考上面提到的实验设计方法，\
+                   'params'是根据'exp_method'生成的实验参数，你需要根据实验方法生成多组实验，每组实验是影响因素的不同取值水平组合，请设置合理的实验组数。\
+                   'exp_method'是一个字符串，'param'是一个数组，数组中的每个元素都是一个字典，字典的key为影响因素的名称，value为影响因素的取值。
         '''
         param_dict = {
-            'info': req,
+            'req': req,
         }
         llm_response, think = self.get_response(info_prompt, input_param_dict=param_dict,
                                                 is_first_call=self.is_first)
         self.is_first = False
         res = {
-            "goal": "",
+            "goal": {},
             "influence_factor": [],
             "response_var": [],
-            "formula": {},
-            "exp_method": {},
+            "formula": [],
+            "exp_params": [],
         }
         try:
             res = {
@@ -51,7 +53,7 @@ class RequirementAnalysisAgent(LLMAgent):
                 "influence_factor": llm_response['influence_factor'],
                 "response_var": llm_response['response_var'],
                 "formula": llm_response['formula'],
-                "exp_method": llm_response['exp_method']
+                "exp_params": llm_response['exp_params']
             }
         except Exception as e:
             print(e)
