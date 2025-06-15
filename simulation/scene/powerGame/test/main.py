@@ -4,18 +4,27 @@ from simulation.models.agents.RAAgent import RequirementAnalysisAgent
 if __name__ == '__main__':
     ra = RequirementAnalysisAgent()
     req = '我想要复现古巴导弹危机中美国和古巴在各个时间段的行为，分析什么因素对战争的走势影响最大'
-    # res = ra.requirement_analysis(req)
-    # print(res)
+    res = ra.requirement_analysis(req)
+    print(res)
 
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="https://uc.chatgptten.com/v1",
-    api_key="sk-IMblefS5KQ5ET8izUvenvX71tOXiIZDp3ICQ33mFcUtKV8lq"
-)
-
+# from openai import OpenAI
+#
+# client = OpenAI(
+#     base_url="https://uc.chatgptten.com/v1",
+#     api_key="sk-IMblefS5KQ5ET8izUvenvX71tOXiIZDp3ICQ33mFcUtKV8lq"
+# )
+# try:
+#     response = client.chat.completions.create(
+#         model="o1-preview",
+#         messages=[
+#             {"role": "user", "content": "天津大学怎么样。"}
+#         ],
+#     )
+# except Exception as e:
+#     print(e)
+'''
 response = client.chat.completions.create(
-  model="gpt-image-1",
+  model="gpt-4o",
   #   这些都可以：
   #   gpt-3.5-turbo-0125
   #   gpt-3.5-turbo-0613
@@ -56,53 +65,54 @@ response = client.chat.completions.create(
 )
 print(response.choices[0].message.content)
 '''
+'''
 {
-    "goal": {
-        "category": "phenomenon explanation",
-        "explain": "The goal is to understand and explain the factors that influenced the outcome of the Cuban Missile Crisis by analyzing historical behavior patterns and determining key influencing variables."
+  "goal": {
+    "category": "现象解释",
+    "explain": "分析古巴导弹危机中美国和古巴的行为模式及其背后的影响因素。"
+  },
+  "influence_factor": [
+    "policy_decisions", 
+    "time_sensitivity", 
+    "alliance_support", 
+    "information_transparency", 
+    "economic_sanctions"
+  ],
+  "response_var": [
+    "tension_level",
+    "military_actions",
+    "crisis_resolution_speed"
+  ],
+  "formula": [
+    {
+      "tension_level": "policy_decisions + time_sensitivity - information_transparency"
     },
-    "influence_factor": [
-        "political_tension",
-        "military_preparedness",
-        "diplomatic_communication",
-        "public_sentiment",
-        "economic_sanctions"
-    ],
-    "response_var": [
-        "conflict escalation",
-        "negotiation_success",
-        "outcome_resolution"
-    ],
-    "formula": [
-        {
-            "conflict_escalation": "political_tension + military_preparedness - diplomatic_communication"
-        },
-        {
-            "negotiation_success": "diplomatic_communication * public_sentiment / economic_sanctions"
-        },
-        {
-            "outcome_resolution": "(military_preparedness + political_tension) * (1 - public_sentiment)"
-        }
-    ],
-    "exp_params": {
-        "exp_method": "orthogonal design",
-        "params": [
-            {
-                "political_tension": ["low", "medium", "high"]
-            },
-            {
-                "military_preparedness": ["low", "medium", "high"]
-            },
-            {
-                "diplomatic_communication": ["poor", "average", "excellent"]
-            },
-            {
-                "public_sentiment": ["negative", "neutral", "positive"]
-            },
-            {
-                "economic_sanctions": ["none", "moderate", "severe"]
-            }
-        ]
+    {
+      "military_actions": "(time_sensitivity * alliance_support) / economic_sanctions"
+    },
+    {
+      "crisis_resolution_speed": "1 / (economic_sanctions + policy_decisions)"
     }
+  ],
+  "exp_params": {
+    "exp_method": "NK因子设计",
+    "params": [
+      {
+        "policy_decisions": ["conservative", "moderate", "aggressive"]
+      },
+      {
+        "time_sensitivity": ["low", "medium", "high"]
+      },
+      {
+        "alliance_support": ["weak", "neutral", "strong"]
+      },
+      {
+        "information_transparency": ["opaque", "partial", "transparent"]
+      },
+      {
+        "economic_sanctions": ["light", "moderate", "severe"]
+      }
+    ]
+  }
 }
 '''

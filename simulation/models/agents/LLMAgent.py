@@ -19,7 +19,7 @@ os.environ["OPENAI_BASE_URL"] = "https://uc.chatgptten.com/v1"
 
 # ollama模型白名单
 OLLAMA_MODEL_LIST = {
-    'think': ['deepseek-r1:32b'],
+    'think': ['deepseek-r1:32b', 'gpt-4o'],
     'nothink': []
 }
 
@@ -108,8 +108,8 @@ class LLMAgent:
                 api_url='ws://spark-api.xf-yun.com/v1.1/chat',
                 model='lite'
             )
-        elif self.llm_model == 'GPT-4o':
-            print('Your Model is Gpt4o')
+        elif self.llm_model == 'gpt-4o':
+            print('Your Model is gpt4o')
             model = ChatOpenAI(
                 model="gpt-4o",
                 api_key=os.environ["OPENAI_API_KEY"],
