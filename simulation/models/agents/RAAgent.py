@@ -32,11 +32,11 @@ class RequirementAnalysisAgent(LLMAgent):
                    "response_var": 响应变量，即实验的因变量，能够客观的反映实验的结果，'response_var'应该为一个list，\
                    'response_var'的内容全部为英文。
                    "formula": 影响因素和响应变量之间的对应公式，每个响应变量都有一个确定的对应公式，公式以数学公式的形式给出，\
-                   'formula'是一个数组，数组中每个元素都是一个字典，字典的key为响应变量的名称，value为影响因素组成的一个公式，\
+                   'formula'的格式为json，每个元素的key为响应变量的名称，value为影响因素组成的一个公式，'formula'的长度与'response_var'相同\
                    'formula'的内容全部为英文
                    "exp_params": 实验参数的格式为json，包含'exp_method'和'params'，'exp_method'是实验方法，具体参考上面提到的实验设计方法，\
                    'params'是根据'exp_method'生成的实验参数，你需要根据实验方法生成多组实验，每组实验是影响因素的不同取值水平组合，请设置合理的实验组数。\
-                   'exp_method'是一个字符串，'param'是一个数组，数组长度与影响因素相等，数组中的每个元素都是一个字典，字典的key为影响因素的名称，value为影响因素的取值，\
+                   'exp_method'是一个字符串，'param'是一个json，'param'中key的数量与影响因素相等，每个元素的key为影响因素的名称，value为影响因素的取值，\
                    'exp_params'的内容全部为英文。
         '''
         param_dict = {
