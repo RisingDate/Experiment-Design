@@ -1,0 +1,49 @@
+{
+  "goal": {
+    "category": "现象解释",
+    "explain": "分析古巴导弹危机中美国和古巴的行为模式及其背后的影响因素。"
+  },
+  "influence_factor": [
+    "policy_decisions",
+    "time_sensitivity",
+    "alliance_support",
+    "information_transparency",
+    "economic_sanctions"
+  ],
+  "response_var": [
+    "tension_level",
+    "military_actions",
+    "crisis_resolution_speed"
+  ],
+  "formula": [
+    {
+      "tension_level": "policy_decisions + time_sensitivity - information_transparency"
+    },
+    {
+      "military_actions": "(time_sensitivity * alliance_support) / economic_sanctions"
+    },
+    {
+      "crisis_resolution_speed": "1 / (economic_sanctions + policy_decisions)"
+    }
+  ],
+  "exp_params": {
+    "exp_method": "NK因子设计",
+    "params": [
+      {
+        "policy_decisions": ["conservative", "moderate", "aggressive"]
+      },
+      {
+        "time_sensitivity": ["low", "medium", "high"]
+      },
+      {
+        "alliance_support": ["weak", "neutral", "strong"]
+      },
+      {
+        "information_transparency": ["opaque", "partial", "transparent"]
+      },
+      {
+        "economic_sanctions": ["light", "moderate", "severe"]
+      }
+    ]
+  }
+}
