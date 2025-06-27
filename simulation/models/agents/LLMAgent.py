@@ -1,5 +1,7 @@
 import os
 import re
+from pprint import pprint
+
 import httpx
 from openai import OpenAI
 
@@ -19,8 +21,8 @@ os.environ["OPENAI_BASE_URL"] = "https://uc.chatgptten.com/v1"
 
 # ollama模型白名单
 OLLAMA_MODEL_LIST = {
-    'think': ['deepseek-r1:32b', 'gpt-4o'],
-    'nothink': []
+    'think': ['deepseek-r1:32b', 'deepseek-r1:32b-qwen-distill-q8_0'],
+    'nothink': ['gpt-4o']
 }
 
 
@@ -177,7 +179,7 @@ class LLMAgent:
                          parser)
                 result = chain.invoke(input_param_dict)
                 if flag_debug_print:
-                    print(result)
+                    pprint(result)
 
         if self.llm_model in OLLAMA_MODEL_LIST['think']:
             return result, think
