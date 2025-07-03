@@ -3,7 +3,7 @@ import json
 from flask import Flask, request
 from flask_cors import CORS
 
-from simulation.models.agents.RAAgent import RequirementAnalysisAgent
+from simulation.models.agents.RA.RAAgent import RequirementAnalysisAgent
 
 app = Flask(__name__)
 CORS(app)

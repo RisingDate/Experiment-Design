@@ -10,8 +10,8 @@ class RequirementAnalysisAgent(LLMAgent):
     def __init__(self, agent_name='RAAgent'):
         super().__init__(agent_name=agent_name, has_chat_history=False, online_track=False, json_format=True,
                          system_prompt='',
-                         llm_model='gpt-4o')
-        # llm_model='deepseek-r1:32b')
+                         # llm_model='gpt-4o')
+                         llm_model='deepseek-r1:32b-qwen-distill-q8_0')
         self.system_prompt = '''
             你正在对复杂社会模型系统推演中的需求进行分析。你需要扮演一个资深的需求处理工程师的角色，你可以参考自身的经验，但请务必以模拟过程中的内容为主。
             在处理过程中你可能会遇到与实验方法有关的一些内容，这些实验方法指的都是计算实验方法，下面是对计算实验方法的一些粗略的介绍和举例，

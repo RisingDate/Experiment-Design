@@ -1,5 +1,5 @@
 
-from simulation.models.agents.RAAgent import RequirementAnalysisAgent
+from simulation.models.agents.RA.RAAgent import RequirementAnalysisAgent
 
 if __name__ == '__main__':
     ra = RequirementAnalysisAgent()
