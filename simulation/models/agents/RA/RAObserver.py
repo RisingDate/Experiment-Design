@@ -1,3 +1,5 @@
+import json
+
 from simulation.models.agents.LLMAgent import LLMAgent
 
 MODEL_LIST = {
@@ -45,17 +47,18 @@ class RequirementAnalysisObserver(LLMAgent):
                         ...
                     }
                 }
-            }, 其中str为字符串，str1和str2为中文字符串，其余全部为英文, 省略号表示后面还有相似内容，\
+            }, 其中str为字符串，str1和str2为中文字符串，其余全部为英文, 省略号表示后面还有相似内容，
             'key: value'表示的是字典，key和value都是英文字符串。
             你需要额外注意'exp_params'的'params'中元素数量与'response_var'的元素数量相同
         '''
         self.is_first = True
 
-    def requirement_observe(self, re_analysis_res):
+    def requirement_observe(self, req, re_analysis_res):
         self.re_analysis_res = re_analysis_res
         info_prompt = '需求分析Agent解析的结果为：{re_analysis_res}'
         param_dict = {
             're_analysis_res': re_analysis_res,
+            'requirement': req,
         }
         if self.llm_model in MODEL_LIST['think']:
             llm_response, think = self.get_response(info_prompt, input_param_dict=param_dict,
@@ -71,3 +74,18 @@ class RequirementAnalysisObserver(LLMAgent):
             print(e)
 
         return res
+
+    def requirement_format_judge(self, analysis_res: json) -> bool:
+        target_keys = ['goal', 'influence_factor', 'response_var', 'formula', 'exp_params']
+        goal_keys = ['category', 'explain']
+        exp_params_keys = ['exp_method', 'params']
+        print(target_keys)
+        if list(analysis_res.keys()) != target_keys or list(analysis_res['goal'].keys()) != goal_keys \
+                or list(analysis_res['exp_params'].keys()) != exp_params_keys \
+                or type(analysis_res['exp_params']['params']) is not dict:
+            print("JSON格式错误")
+            return False
+        elif len(analysis_res['response_var']) != len(analysis_res['formula']):
+            print("响应变量与公式数量不符")
+            return False
+        return True
