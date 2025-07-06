@@ -1,8 +1,12 @@
 
 from simulation.models.agents.RA.RAAgent import RequirementAnalysisAgent
+from simulation.models.agents.RA.RAObserver import RequirementAnalysisObserver
 
 if __name__ == '__main__':
     ra = RequirementAnalysisAgent()
+    raObserver = RequirementAnalysisObserver()
     req = '我想要复现古巴导弹危机中美国和古巴在各个时间段的行为，分析什么因素对战争的走势影响最大'
     res = ra.requirement_analysis(req)
     print(res)
+    re_is_true = raObserver
+    print(re_is_true)
