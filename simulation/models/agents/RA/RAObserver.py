@@ -15,6 +15,7 @@ class RequirementAnalysisObserver(LLMAgent):
                          json_format=False,
                          system_prompt='',
                          llm_model=llm_model)
+        self.re_analysis_res = None
         print('this is RAObserver')
         self.requirement = requirement
         self.system_prompt = '''
