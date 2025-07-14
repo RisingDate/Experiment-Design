@@ -15,6 +15,6 @@ if __name__ == '__main__':
         print(analysis_res)
         is_analysis_format_true = raObserver.requirement_format_judge(analysis_res)
         if is_analysis_format_true:
-            print(f'------需求解析完成------')
+            print(f'------需求解析成功------')
             break
         print(f'------需求解析错误({analysis_num})------')
