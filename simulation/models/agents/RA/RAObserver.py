@@ -9,7 +9,7 @@ MODEL_LIST = {
 
 
 class RequirementAnalysisObserver(LLMAgent):
-    def __init__(self, agent_name='RAAgent', requirement='',
+    def __init__(self, agent_name='RAObserver', requirement='',
                  llm_model='deepseek-r1:32b-qwen-distill-q8_0'):
         super().__init__(agent_name=agent_name,
                          has_chat_history=False,
