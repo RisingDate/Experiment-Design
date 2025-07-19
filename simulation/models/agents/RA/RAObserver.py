@@ -18,7 +18,6 @@ class RequirementAnalysisObserver(LLMAgent):
                          system_prompt='',
                          llm_model=llm_model)
         self.re_analysis_res = None
-        print('this is RAObserver')
         self.requirement = requirement
         self.system_prompt = '''
             我定义了一个用于需求分析的Agent，他会将我输入的需求：{requirement}解析为一个格式化的json数据。
