@@ -68,18 +68,18 @@ class VariableControlAgent(LLMAgent):
         else:
             llm_response = self.get_response(info_prompt, input_param_dict=param_dict,
                                              is_first_call=self.is_first)
-        self.is_first = False
+        self.is_first = True
         res = {}
         try:
             if llm_response['is_reasonable'] == 1:
                 res = {
-                    "is_reasonable": 'raAgent解析内容合理',
+                    "is_reasonable": 1,
                     'reason': llm_response['reason'],
                     "var_explain": llm_response['var_explain'],
                 }
             else:
                 res = {
-                    "is_reasonable": 'raAgent解析内容不合理',
+                    "is_reasonable": 0,
                     'reason': llm_response['reason'],
                     'influence_factor': llm_response['influence_factor'],
                     'response_var': llm_response['response_var'],
@@ -93,12 +93,13 @@ class VariableControlAgent(LLMAgent):
         return res
 
     def VCExpParamAnalysis(self, req, influence_factor, response_var, formula, exp_params):
-        info_prompt = f'''
-            在本次需求分析中，用户提出的需求为：{req}
-            影响因素为：{influence_factor}
-            响应变量为：{response_var}
-            影响因素和响应变量之间的对应关系为：{formula}
-            为了更好的分析响应变量的变化情况，我们选择的实验方法以及为影响因素设置的参数分布为：{exp_params}
+        info_prompt = '''
+            在本次需求分析中，用户提出的需求为：{req}，
+            影响因素为：{influence_factor}，
+            响应变量为：{response_var}，
+            影响因素和响应变量之间的对应关系为：{formula}，
+            为了更好的分析响应变量的变化情况，我们选择的实验方法以及为影响因素设置的参数分布为：{exp_params}，
+            你需要认真审查传入的实验参数{exp_params}，确保他内容设置的合理且参数值的选择具有实际意义。
             - 你回复的格式均为json，但是包含两种情况：
             - 第一种：如果你认为实验方法的选择和参数的设置是合理的，回复格式为：
                 "is_reasonable": 1。
@@ -106,11 +107,11 @@ class VariableControlAgent(LLMAgent):
             - 第二种：如果你认为不合理或者'exp_params'中的参数与'影响因素'不符，回复格式如下：
                 "is_reasonable": 0。
                 "reason": 不合理的原因，'reason'是一个中文的str。
-                "exp_params": 实验参数的格式为json，与传入的'exp_params'格式完全相同，包含'exp_method'和'params'，\
+                "exp_params": 这是你重新分析后对实验设置的参数，实验参数的格式为json，与传入的'exp_params'格式完全相同但内容不同，包含'exp_method'和'params'，\
                     'exp_method'是实验方法，具体参考上面提到的实验设计方法，'exp_method'是一个字符串，\
                     'params'是根据'exp_method'生成的实验参数，你需要根据实验方法生成多组实验，每组实验是影响因素的不同取值水平组合，请设置合理的实验组数。\
-                    'param'是一个json，而不是一个list，'param'中key的数量与影响因素相等，每个元素的key为影响因素的名称，value为影响因素的取值，所有影响因素的取值数量应该相同。\
-                    'exp_params'的内容全部为英文。
+                    'params'是一个json，而不是一个list，'params'中key的数量与影响因素相等，每个元素的key为影响因素的名称，value为影响因素的取值，所有影响因素的取值数量应该相同。\
+                    'params'的内容全部为英文。
         '''
         param_dict = {
             'req': req,
@@ -125,17 +126,17 @@ class VariableControlAgent(LLMAgent):
         else:
             llm_response = self.get_response(info_prompt, input_param_dict=param_dict,
                                              is_first_call=self.is_first)
-        self.is_first = False
+        self.is_first = True
         res = {}
         try:
             if llm_response['is_reasonable'] == 1:
                 res = {
-                    "is_reasonable": '实验参数设置合理',
+                    "is_reasonable": 1,
                     'reason': llm_response['reason'],
                 }
             else:
                 res = {
-                    "is_reasonable": '实验参数设置不合理',
+                    "is_reasonable": 0,
                     'reason': llm_response['reason'],
                     'exp_params': llm_response['exp_params'],
                 }

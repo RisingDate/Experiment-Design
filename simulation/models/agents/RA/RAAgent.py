@@ -41,7 +41,7 @@ class RequirementAnalysisAgent(LLMAgent):
                 "exp_params": 实验参数的格式为json，包含'exp_method'和'params'，\
                     'exp_method'是实验方法，具体参考上面提到的实验设计方法，'exp_method'是一个字符串，\
                     'params'是根据'exp_method'生成的实验参数，你需要根据实验方法生成多组实验，每组实验是影响因素的不同取值水平组合，请设置合理的实验组数。\
-                    'param'是一个json，而不是一个list，'param'中key的数量与影响因素相等，每个元素的key为影响因素的名称，value为影响因素的取值，所有影响因素的取值数量应该相同。\
+                    'params'是一个json，而不是一个list，'params'中key的数量与影响因素相等，每个元素的key为影响因素的名称，value为影响因素的取值，所有影响因素的取值数量应该相同。\
                     'exp_params'的内容全部为英文。
         '''
         param_dict = {
