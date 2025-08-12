@@ -27,6 +27,7 @@ class VariableControlAgent(LLMAgent):
         '''
         self.is_first = True
 
+    # 分析 影响因素和响应变量 的设计是否合理
     def VCAnalysis(self, req, influence_factor, response_var, formula):
         info_prompt = '''
             在本次需求分析中，用户提出的需求为：{req}
@@ -92,6 +93,7 @@ class VariableControlAgent(LLMAgent):
 
         return res
 
+    # 分析 实验方法和实验参数 的设计是否合理
     def VCExpParamAnalysis(self, req, influence_factor, response_var, formula, exp_params):
         info_prompt = '''
             在本次需求分析中，用户提出的需求为：{req}，
