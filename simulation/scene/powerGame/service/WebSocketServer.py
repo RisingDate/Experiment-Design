@@ -31,8 +31,8 @@ async def send_data(websocket, data, agent_state, info):
         'agent_state': agent_state,
         'info': info
     }
+    await asyncio.sleep(2)
     await websocket.send(json.dumps(res))
-    time.sleep(1)
 
 
 # 需求解析
@@ -68,6 +68,7 @@ async def req_analysis(websocket):
         # log_with_tag(message=json.dumps(ra_res), tag='RA Result', level='info')
         # 检查需求分析结果格式是否正确
         agent_state[1] = 1
+        await send_data(websocket, None, agent_state, '需求解析结果格式检查中')
         is_analysis_format_true = raObserver.requirement_format_judge(ra_res)
         if is_analysis_format_true:
             agent_state[1] = 2
