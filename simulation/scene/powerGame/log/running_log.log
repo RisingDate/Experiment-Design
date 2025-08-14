@@ -158,3 +158,11 @@
 [VC-Exp Param Error] 2025-07-21 11:52:19,324 - WARNING - 实验参数设置不合理
 [VC-Exp Param Error Reason] 2025-07-21 11:52:19,324 - INFO - 当前实验方法和参数设置存在以下问题：1. 虽然Monte Carlo方法适合处理不确定性，但其关键在于对每个影响因素设置连续或概率分布的参数，而目前的参数设置仅为离散取值，未能体现Monte Carlo方法的优势。2. 影响因素的参数值范围设置虽有一定逻辑，但缺乏明确的实际依据，例如'Soviet_response'中的'neutral'与实际危机中苏联的可能反应不完全一致，'Global_diplomatic_pressure'的三个水平也显得过于简单，未能充分体现复杂的外交局势。
 [New Exp Params] 2025-07-21 11:52:19,324 - INFO - {"exp_method": "\u6b63\u4ea4\u8bbe\u8ba1", "params": {"US_military_posture": ["aggressive", "moderate", "defensive"], "Soviet_response": ["escalation", "compromise", "retreat"], "Cuban_defense_reactions": ["offensive", "defensive", "neutral"], "Global_diplomatic_pressure": ["high", "medium", "low"]}}
+[---New Exp---] 2025-08-14 11:32:32,733 - CRITICAL -  
+[---New Exp---] 2025-08-14 11:33:13,715 - CRITICAL -  
+[RA Result] 2025-08-14 11:33:17,261 - INFO - {"goal": {}, "influence_factor": [], "response_var": [], "formula": [], "exp_params": []}
+[RA Fail] 2025-08-14 11:33:17,262 - ERROR - 需求解析失败
+[RA Result] 2025-08-14 11:33:20,180 - INFO - {"goal": {}, "influence_factor": [], "response_var": [], "formula": [], "exp_params": []}
+[RA Fail] 2025-08-14 11:33:20,180 - ERROR - 需求解析失败
+[RA Result] 2025-08-14 11:33:22,969 - INFO - {"goal": {}, "influence_factor": [], "response_var": [], "formula": [], "exp_params": []}
+[RA Fail] 2025-08-14 11:33:22,970 - ERROR - 需求解析失败

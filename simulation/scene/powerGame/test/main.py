@@ -5,7 +5,7 @@ import logging
 import json
 from typing import Literal
 
-MODEL_LIST = ['deepseek-r1:32b', 'deepseek-r1:32b-qwen-distill-q8_0', 'gpt-4o']
+MODEL_LIST = ['deepseek-r1:32b', '', 'deepseek-r1:32b-qwen-distill-q8_0', 'gpt-4o']
 REQUIREMENT_LIST = [
     '我想要复现古巴导弹危机中美国和古巴在各个时间段的行为，分析什么因素对战争的走势影响最大',
     '我想要分析一个由业务员组成的数字政务系统中，对业务员工作效率影响的最大因素。在此系统中，业务员需要不断处理来自客户的订单，每一份订单的难度有不同的水平，员工的薪资可能也不相同',
