@@ -3,12 +3,14 @@ import json
 import math
 import time
 import uuid
+from datetime import datetime
 from pprint import pprint
 import websockets
 import asyncio
 import os
 import glob
 
+from simulation.models.agents.ED.VCAgent import VariableControlAgent
 from simulation.models.agents.RA.RAAgent import RequirementAnalysisAgent
 from simulation.models.agents.RA.RAObserver import RequirementAnalysisObserver
 
@@ -38,7 +40,7 @@ async def send_data(websocket, data, agent_state, info):
 # 需求解析
 async def req_analysis(websocket):
     # 使用的模型
-    MODEL_NAME = MODEL_LIST[1]
+    MODEL_NAME = MODEL_LIST[2]
     # 当前需求
     req = REQUIREMENT_LIST[2]
     # 需求解析后的参数字典
@@ -60,20 +62,22 @@ async def req_analysis(websocket):
     analysis_num = 0
     while True:
         agent_state[0] = 1
-        await send_data(websocket, None, agent_state, None)
+        await send_data(websocket, None, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 0, 'data': '我正在解析用户需求'})
         ra_res = raAgent.requirement_analysis(req)
         agent_state[0] = 2
-        await send_data(websocket, ra_res, agent_state, None)
+        await send_data(websocket, ra_res, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 0, 'data': '用户需求解析完成'})
         print(ra_res)
-        # log_with_tag(message=json.dumps(ra_res), tag='RA Result', level='info')
         # 检查需求分析结果格式是否正确
         agent_state[1] = 1
-        await send_data(websocket, None, agent_state, '需求解析结果格式检查中')
+        await send_data(websocket, None, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 1, 'data': '我正在检查生成的需求格式是否正确'})
         is_analysis_format_true = raObserver.requirement_format_judge(ra_res)
         if is_analysis_format_true:
             agent_state[1] = 2
-            await send_data(websocket, ra_res, agent_state, '需求解析完成')
-            # log_with_tag(message='需求解析成功', tag='RA Success', level='warning')
+            await send_data(websocket, ra_res, agent_state,
+                            {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 1, 'data': '我认为格式是正确的'})
             print(f'\033[31m------需求解析成功------\033[0m')
             exp_param['goal'] = ra_res['goal']
             exp_param['influence_factor'] = ra_res['influence_factor']
@@ -83,10 +87,79 @@ async def req_analysis(websocket):
             break
         else:
             agent_state[1] = 3
-            await send_data(websocket, ra_res, agent_state, '需求解析格式错误')
-            # log_with_tag(message='需求解析失败', tag='RA Fail', level='error')
+            await send_data(websocket, ra_res, agent_state,
+                            {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 1, 'data': '解析结果的格式是错误的，接下来将由RAAgent重新解析需求'})
+            await asyncio.sleep(3)
             print(f'\033[31m------需求解析错误({++analysis_num})------\033[0m')
             agent_state[1] = 0
+            await asyncio.sleep(3)
+
+    # 影响因素和响应变量内容检查
+    vcAgent = VariableControlAgent(llm_model=MODEL_NAME)
+    agent_state[2] = 1
+    await send_data(websocket, exp_param, agent_state,
+                    {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 2, 'data': '我正在检查生成的变量是否合理'})
+    vc_res = vcAgent.VCAnalysis(req=req,
+                                influence_factor=ra_res['influence_factor'],
+                                response_var=ra_res['response_var'],
+                                formula=ra_res['formula'])
+    print('VC Response: ', vc_res)
+    if vc_res['is_reasonable'] == 1:
+        agent_state[2] = 2
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 2, 'data': '我认为生成的变量是合理的'})
+        print('\033[31m------变量生成正确------\033[0m')
+    else:
+        # -------变量解析结果不合理------------
+        agent_state[2] = 3
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 2, 'data': '我认为生成的变量不合理，理由为：' + vc_res['reason']})
+        await asyncio.sleep(3)
+
+        agent_state[2] = 1
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 2, 'data': '我正在重新思考变量内容'})
+        await asyncio.sleep(3)
+
+        print('\033[31m------变量生成不合理------\033[0m')
+        exp_param['influence_factor'] = vc_res['influence_factor']
+        exp_param['response_var'] = vc_res['response_var']
+        exp_param['formula'] = vc_res['formula']
+        agent_state[2] = 2
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 2, 'data': '我已重新生成变量'})
+
+    # 实验方案检查
+    agent_state[3] = 1
+    await send_data(websocket, exp_param, agent_state,
+                    {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 3, 'data': '开始检查生成的实验方案是否合理'})
+
+    vc_exp_param_res = vcAgent.VCExpParamAnalysis(req=req,
+                                                  influence_factor=exp_param['influence_factor'],
+                                                  response_var=exp_param['response_var'],
+                                                  formula=exp_param['formula'],
+                                                  exp_params=exp_param['exp_params'])
+    if vc_exp_param_res['is_reasonable'] == 1:
+        agent_state[3] = 2
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 3, 'data': '我认为实验方案是合理的'})
+        print('\033[31m------实验参数设置合理------\033[0m')
+    else:
+        agent_state[3] = 3
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 3, 'data': '我认为实验方案不合理，理由如下：' + vc_exp_param_res['reason']})
+        await asyncio.sleep(3)
+
+        agent_state[3] = 1
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 3, 'data': '我开始重新思考实验方案'})
+        await asyncio.sleep(3)
+
+        print('\033[31m------实验参数设置不合理------\033[0m')
+        exp_param['exp_params'] = vc_exp_param_res['exp_params']
+        agent_state[3] = 2
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 3, 'data': '已重新生成实验方案'})
 
 
 async def handle_message(websocket, message):
