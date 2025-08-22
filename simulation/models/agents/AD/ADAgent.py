@@ -1,6 +1,8 @@
 """
     AgentDesignAgent：在需求分析完成后 设计Agent
 """
+import json
+
 from simulation.models.agents.LLMAgent import LLMAgent
 
 MODEL_LIST = {
@@ -28,20 +30,26 @@ class AgentDesignAgent(LLMAgent):
         info_prompt = '''
             用户的需求为：
                 {req}
-            我生成的实验方案为：
+            我生成的实验设计方案为：
                 {exp_plan}
+            - 'exp_plan'中包含的内容解释如下:
+                'goal': 实验目的。
+                'influence_factor': 影响因素，也就是实验的自变量。
+                'response_var': 响应变量，也就是实验的因变量。
+                'formula': 影响因素和响应变量之间的对应关系。
+                'exp_params': 实验参数。
+                'var_explain': 对影响因素和响应变量以及公式的中文解释。
             - 当你回复时，必须采取下面的json格式:
                 "attribute": Agent的属性
                 "attribute_explain": Agent属性的解释
-                "relationship_net": Agent之间的关系网络
+                "relationship_net": Agent之间的关系网络，包含任意两个Agent之间的关系
             - 接下来是对回复内容中每个key的解释：
             - "attribute"的格式为一个json数组，数组中的每个元素都是一个Agent的属性内容(json格式)。下面是数组中每个元素的json格式：
                 "name": Agent的名称，请使用中文，例如'小明'、'小黑'、'大卫'或其他具有实际意义的名称等。
                 "identify": Agent的身份，请使用中文，例如'银行柜员'、'国家领导人'、'国会成员'等。
                 "age": Agent的年龄，是一个整数，例如'35'、'18'等。
                 ...
-                注意：'name'、'identify'、'age'是每个Agent的固有属性，而'...'代表的是需要由你来设计的属性，格式与前面提到的三个是相同的。\
-                每个Agent的属性内容(key)应当是相同的，value值则不一定。
+                注意：'name'、'identify'、'age'是每个Agent的固有属性，而'...'代表的是需要由你来设计的属性，格式与前面提到的三个是相同的。
             - "attribute_explain"的格式为一个json数组，该数组长度与"attribute"数组第0号元素的内容数量相同，\
                 数组中的每个元素都是对Agent的某个属性的解释。下面是数组中每个元素的json格式：
                 "attribute": 属性名称，与"attribute"数组中的元素内容对应。
@@ -64,21 +72,32 @@ class AgentDesignAgent(LLMAgent):
                                              is_first_call=self.is_first)
         self.is_first = False
         res = {
-            "goal": {},
-            "influence_factor": [],
-            "response_var": [],
-            "formula": [],
-            "exp_params": [],
+            'attribute': [],
+            'attribute_explain': [],
+            'relationship_net': []
         }
         try:
             res = {
-                "goal": llm_response['goal'],
-                "influence_factor": llm_response['influence_factor'],
-                "response_var": llm_response['response_var'],
-                "formula": llm_response['formula'],
-                "exp_params": llm_response['exp_params']
+                "attribute": llm_response['attribute'],
+                "attribute_explain": llm_response['attribute_explain'],
+                "relationship_net": llm_response['relationship_net'],
             }
         except Exception as e:
             print(e)
 
         return res
+
+    def format_check(self, agent_design_res: dict) -> (bool, str):
+        if type(agent_design_res) != dict:
+            return False, '结果不是一个json'
+        elif set(agent_design_res.keys()) != {'attribute', 'attribute_explain', 'relationship_net'}:
+            return False, '内容key值不正确'
+        elif (type(agent_design_res['attribute']) != list or type(agent_design_res['attribute_explain']) != list
+              or type(agent_design_res['relationship_net']) != list):
+            return False, '存在value不为数组'
+
+        agent_num = len(agent_design_res['attribute'])
+        if len(agent_design_res['relationship_net']) != agent_num * (agent_num - 1):
+            return False, '关系网络中关系数错误'
+
+        return True, '格式正确'

@@ -16,4 +16,11 @@ def run():
 
 if __name__ == '__main__':
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    test_dist = {
+        'aa': ['a', 'a', 'a'],
+        'bb': ['b', 'b', 'b'],
+        'cc': ['c', 'c', 'c'],
+    }
+    print(type(test_dist))
+    print(type(test_dist['aa']))
     run()

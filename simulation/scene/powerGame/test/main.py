@@ -1,6 +1,7 @@
 from simulation.models.agents.RA.RAAgent import RequirementAnalysisAgent
 from simulation.models.agents.RA.RAObserver import RequirementAnalysisObserver
 from simulation.models.agents.ED.VCAgent import VariableControlAgent
+from simulation.models.agents.AD.ADAgent import AgentDesignAgent
 import logging
 import json
 from typing import Literal
@@ -53,7 +54,13 @@ if __name__ == '__main__':
         'influence_factor': None,
         'response_var': None,
         'formula': None,
-        'exp_params': None
+        'exp_params': None,
+        'var_explain': None,
+    }
+    agent_design_res = {
+        'attribute': [],
+        'attribute_explain': [],
+        'relationship_net': []
     }
 
     # 需求分析
@@ -79,7 +86,8 @@ if __name__ == '__main__':
             break
         else:
             log_with_tag(message='需求解析失败', tag='RA Fail', level='error')
-            print(f'\033[31m------需求解析错误({++analysis_num})------\033[0m')
+            print(f'\033[31m------需求解析错误({analysis_num})------\033[0m')
+            analysis_num += 1
 
     # 影响因素和响应变量内容检查
     vcAgent = VariableControlAgent(llm_model=MODEL_LIST[2])
@@ -97,6 +105,7 @@ if __name__ == '__main__':
         exp_param['influence_factor'] = vc_res['influence_factor']
         exp_param['response_var'] = vc_res['response_var']
         exp_param['formula'] = vc_res['formula']
+    exp_param['var_explain'] = vc_res['var_explain']
     log_with_tag(message=json.dumps(vc_res), tag='VC Result', level='info')
 
     # 实验参数检查
@@ -118,4 +127,19 @@ if __name__ == '__main__':
 
     print(vc_exp_param_res)
 
-    
+    # 智能体设计
+    agent_design_format_flag = False
+    while not agent_design_format_flag:
+        adAgent = AgentDesignAgent(llm_model=MODEL_LIST[2])
+        agent_design_res = adAgent.agent_design(req, exp_param)
+        log_with_tag(message=agent_design_res, tag='AD Result', level='info')
+        print('智能体设计结果: ', agent_design_res)
+
+        agent_design_format_flag, ad_format_check_info = adAgent.format_check(agent_design_res)
+        if not agent_design_format_flag:
+            print('\033[31m------智能体设计方案不合理------\033[0m')
+            print('错误原因为： ', ad_format_check_info)
+            log_with_tag(message=ad_format_check_info, tag='AD Error', level='error')
+        else:
+            print('\033[32m------智能体设计方案合理------\033[0m')
+            log_with_tag(message='智能体设计方案格式正确', tag='AD Accept', level='info')
