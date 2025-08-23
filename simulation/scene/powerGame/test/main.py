@@ -64,7 +64,7 @@ if __name__ == '__main__':
     }
 
     # 需求分析
-    req = REQUIREMENT_LIST[2]
+    req = REQUIREMENT_LIST[0]
 
     raAgent = RequirementAnalysisAgent(llm_model=MODEL_LIST[2])
     raObserver = RequirementAnalysisObserver(llm_model=MODEL_LIST[2])
@@ -128,9 +128,9 @@ if __name__ == '__main__':
     print(vc_exp_param_res)
 
     # 智能体设计
+    adAgent = AgentDesignAgent(llm_model=MODEL_LIST[2])
     agent_design_format_flag = False
     while not agent_design_format_flag:
-        adAgent = AgentDesignAgent(llm_model=MODEL_LIST[2])
         agent_design_res = adAgent.agent_design(req, exp_param)
         log_with_tag(message=agent_design_res, tag='AD Result', level='info')
         print('智能体设计结果: ', agent_design_res)

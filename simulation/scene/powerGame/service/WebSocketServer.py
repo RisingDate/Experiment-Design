@@ -10,6 +10,7 @@ import asyncio
 import os
 import glob
 
+from simulation.models.agents.AD.ADAgent import AgentDesignAgent
 from simulation.models.agents.ED.VCAgent import VariableControlAgent
 from simulation.models.agents.RA.RAAgent import RequirementAnalysisAgent
 from simulation.models.agents.RA.RAObserver import RequirementAnalysisObserver
@@ -40,7 +41,7 @@ async def send_data(websocket, data, agent_state, info):
 # 需求解析
 async def req_analysis(websocket):
     # 使用的模型
-    MODEL_NAME = MODEL_LIST[2]
+    MODEL_NAME = MODEL_LIST[1]
     # 当前需求
     req = REQUIREMENT_LIST[2]
     # 需求解析后的参数字典
@@ -49,7 +50,8 @@ async def req_analysis(websocket):
         'influence_factor': None,
         'response_var': None,
         'formula': None,
-        'exp_params': None
+        'exp_params': None,
+        'agent_design_res': None
     }
     # 各agent状态
     # index：{ 0: 需求解析 1: 需求格式检查 2: 变量检查 3: 实验方案检查 4: Agent设计}
@@ -90,7 +92,8 @@ async def req_analysis(websocket):
             await send_data(websocket, ra_res, agent_state,
                             {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 1, 'data': '解析结果的格式是错误的，接下来将由RAAgent重新解析需求'})
             await asyncio.sleep(3)
-            print(f'\033[31m------需求解析错误({++analysis_num})------\033[0m')
+            print(f'\033[31m------需求解析错误({analysis_num})------\033[0m')
+            analysis_num += 1
             agent_state[1] = 0
             await asyncio.sleep(3)
 
@@ -161,7 +164,36 @@ async def req_analysis(websocket):
         await send_data(websocket, exp_param, agent_state,
                         {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 3, 'data': '已重新生成实验方案'})
 
-    # TODO Agent设计
+    # 智能体设计
+    adAgent = AgentDesignAgent(llm_model=MODEL_NAME)
+    agent_design_format_flag = False
+    while not agent_design_format_flag:
+        agent_state[4] = 1
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 4, 'data': '我正在设计实验需要的Agent'})
+        agent_design_res = adAgent.agent_design(req, exp_param)
+
+        exp_param['agent_design_res'] = agent_design_res
+        agent_state[4] = 0
+        await send_data(websocket, exp_param, agent_state,
+                        {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 4, 'data': 'Agent设计完成，等待检测...'})
+        await asyncio.sleep(3)
+        print('智能体设计结果: ', agent_design_res)
+
+        agent_design_format_flag, ad_format_check_info = adAgent.format_check(agent_design_res)
+        if not agent_design_format_flag:
+            print('\033[31m------智能体设计方案不合理------\033[0m')
+            print('错误原因为： ', ad_format_check_info)
+            agent_state[4] = 3
+            await send_data(websocket, exp_param, agent_state,
+                            {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 4, 'data': 'Agent设计存在问题：' + ad_format_check_info})
+            await asyncio.sleep(3)
+
+        else:
+            print('\033[32m------智能体设计方案合理------\033[0m')
+            agent_state[4] = 2
+            await send_data(websocket, exp_param, agent_state,
+                            {'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'agent_index': 4, 'data': 'Agent设计完成内容通过检测'})
 
 
 async def handle_message(websocket, message):
