@@ -54,7 +54,8 @@ class AgentDesignAgent(LLMAgent):
                 数组中的每个元素都是对Agent的某个属性的解释。下面是数组中每个元素的json格式：
                 "attribute": 属性名称，与"attribute"数组中的元素内容对应。
                 "explain": 属性的解释，使用中文回答
-            - "relationship_net"的格式为一个json数组，该数组长度为n*(n-1)，其中n为"attribute"数组的长度。下面是对该数组中每个元素的描述：
+            - "relationship_net"的格式为一个json数组，表示的是"attribute"数组中任意两个Agent之间的关系，需要同时包含A->B与B->A之间的关系。\
+                该数组长度为n*(n-1)，其中n为"attribute"数组的长度。下面是对该数组中每个元素的描述：
                 "source": 关系中的源智能体，为"attribute"数组中某个Agent的名称。
                 "target": 关系中的目标智能体，为"attribute"数组中某个Agent的名称。
                 "relationship": 源智能体和目标智能体之间的关系描述，例如'合作'，'竞争'，'同盟'，'敌对'，'恋人'，'未知'等等，\
